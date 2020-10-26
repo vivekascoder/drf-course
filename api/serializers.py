@@ -22,5 +22,5 @@ from api.models import Todo
 class TodoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Todo
-        fields = ['task', 'is_completed', 'time']
-        # fields = '__all__'
+        # fields = ['task', 'is_completed', 'time']
+        fields = '__all__'

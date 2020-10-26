@@ -6,11 +6,12 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.views import APIView
 
 # Create your views here.
-@api_view(['GET', 'PUT', 'DELETE'])
-def todo(request, pk):
-    def get_queryset():
+
+class TodoView(APIView):
+    def get_queryset(self, pk):
         try:
             todo = Todo.objects.get(pk=pk)
         except Todo.DoesNotExist:
@@ -21,13 +22,13 @@ def todo(request, pk):
             )
         return todo
     
-    if request.method == "GET":
-        todo = get_queryset()
+    def get(self, request, pk):
+        todo = self.get_queryset(pk)
         serializer = TodoSerializer(todo)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    elif request.method == "PUT":
-        todo = get_queryset()
+    def put(self, request, pk):
+        todo = self.get_queryset(pk)
         print(request.data)
         serializer = TodoSerializer(instance=todo, data=request.data, partial=True)
         if serializer.is_valid():
@@ -36,20 +37,20 @@ def todo(request, pk):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    elif request.method == "DELETE":
-        todo = get_queryset()
+    def delete(self, request, pk):
+        todo = self.get_queryset(pk)
+        serializer = TodoSerializer(instance=todo)
         todo.delete()
-        return Response({'msg': "Deleted"})
+        return Response(serializer.data)
 
 
-@api_view(['GET', 'POST'])
-def create_todo(request):
-    if request.method == "GET":
+class TodoListView(APIView):
+    def get(self, request):
         queryset = Todo.objects.all()
         serializer = TodoSerializer(instance=queryset, many=True)
         return Response(data=serializer.data)
 
-    elif request.method == "POST":
+    def post(self, request):
         serializer = TodoSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

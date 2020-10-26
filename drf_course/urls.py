@@ -4,6 +4,6 @@ from api import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('todo/<int:pk>', views.todo, name='todo'),
-    path('todo', views.create_todo, name='todo-create'),
+    path('todo/<int:pk>', views.TodoView.as_view(), name='todo'),
+    path('todo', views.TodoListView.as_view(), name='todo-create'),
 ]
