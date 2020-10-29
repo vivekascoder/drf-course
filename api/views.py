@@ -11,45 +11,26 @@ from rest_framework import generics, mixins
 from rest_framework import permissions, authentication
 from rest_framework.decorators import permission_classes, authentication_classes
 from django.contrib.auth import login, logout, authenticate
+from rest_framework.authtoken.models import Token
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
 
 # !Create your views here.
 
 
-# !RUD Operations using mixins
-# class TodoView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
-#     serializer_class = TodoSerializer
-#     queryset = Todo.objects.all()
-
-#     def get(self, request, *args, **kwargs):
-#         return self.retrieve(request, *args, **kwargs)
-    
-#     def put(self, request, *args, **kwargs):
-#         return self.update(request, *args, **kwargs)
-
-#     def delete(self, request, *args, **kwargs):
-#         return self.destroy(request, *args, **kwargs)
 
 class TodoView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TodoSerializer
     queryset = Todo.objects.all()
 
-# ? LC Operations  using rest_framework mixins.
-# class TodoListView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
-#     serializer_class = TodoSerializer
-#     queryset = Todo.objects.all()
-
-#     def get(self, request, *args, **kwargs):
-#         return self.list(request, *args, **kwargs)
-    
-#     def post(self, request, *args, **kwargs):
-#         return self.create(request, *args, **kwargs)
 
 
 class TodoListView(generics.ListCreateAPIView):
     serializer_class = TodoSerializer
     queryset = Todo.objects.all()
     permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = [authentication.SessionAuthentication]
+    authentication_classes = [ authentication.TokenAuthentication]
+
 
 class LoginView(APIView):
     def post(self, request):
@@ -57,11 +38,17 @@ class LoginView(APIView):
         if serializer.is_valid():
             username = serializer.validated_data.get('username', None)
             password = serializer.validated_data.get('password', None)
+        # if len(password) > 7:
         if username and password:
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return Response({'message': "You're logged in."})
+                try:
+                    t = Token.objects.get(user=user)
+                except Token.DoesNotExist:
+                    t = Token.objects.create(user=user)
+                auth_token = t.key
+                return Response({'message': "You're logged in.", 'token': auth_token})
             else:
                 return Response({'error': "Correct credentials were not provided"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'error': "Provide username and password."}, status=status.HTTP_400_BAD_REQUEST)
@@ -73,3 +60,13 @@ class LogoutView(APIView):
         return Response({'message': "You're logout"})
 
   
+
+
+
+class TodoViewSet(ModelViewSet):
+    queryset = Todo.objects.all()
+    serializer_class = TodoSerializer
+
+    @action(detail=True, methods=['GET'])
+    def data(self, request, **kwargs):
+        return Response({'message': 'Nested Route'})

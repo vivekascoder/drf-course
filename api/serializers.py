@@ -22,7 +22,7 @@ from api.models import Todo
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
-    
+
 
 class TodoSerializer(serializers.ModelSerializer):
     class Meta:
