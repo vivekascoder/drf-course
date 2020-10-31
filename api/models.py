@@ -24,3 +24,17 @@ class Todo(models.Model):
     time = models.DateTimeField(auto_now_add=True)
     class Meta:
         ordering = ('-time',)
+
+
+class Person(models.Model):
+    name = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.name
+
+class Teacher(models.Model):
+    name = models.CharField(max_length=100)
+    persons = models.ManyToManyField(Person)
+
+    def __str__(self):
+        return self.name

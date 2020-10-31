@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from api.models import Todo
 from django.http import JsonResponse
-from api.serializers import TodoSerializer, LoginSerializer
+from api.serializers import TodoSerializer, LoginSerializer, Teacher, TeacherSerializer
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -14,23 +14,42 @@ from django.contrib.auth import login, logout, authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
+from rest_framework import throttling, pagination
 
 # !Create your views here.
 
+class TeacherPagination(pagination.PageNumberPagination):
+    page_size = 2
 
+class TeacherThrottle(throttling.AnonRateThrottle):
+    scope = 'free'
+class TeacherUSerThrottle(throttling.UserRateThrottle):
+    scope = 'paid'
+
+class TeacherViewSet(ModelViewSet):
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+    pagination_class = TeacherPagination
+    throttle_classes = [TeacherThrottle]
+    # throttle_classes = [TeacherUSerThrottle]
 
 class TodoView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TodoSerializer
     queryset = Todo.objects.all()
 
-
+class TeacherView(APIView):
+    def post(self, request):
+        serializer = TeacherSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
 
 class TodoListView(generics.ListCreateAPIView):
     serializer_class = TodoSerializer
     queryset = Todo.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [ authentication.TokenAuthentication]
-
 
 class LoginView(APIView):
     def post(self, request):

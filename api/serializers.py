@@ -1,23 +1,9 @@
 from rest_framework import serializers
 import datetime
-from api.models import Todo
+from api.models import Todo, Teacher, Student
 
 
-# class TodoSerializer(serializers.Serializer):
-#     task = serializers.CharField()
-#     is_completed = serializers.BooleanField(default=False)
-#     time = serializers.DateTimeField(default=datetime.datetime.now())
 
-#     def create(self, validated_data):
-#         return Todo.objects.create(**validated_data)
-    
-#     def update(self, instance, validated_data):
-#         print(validated_data)
-#         instance.task = validated_data.get('task', instance.task)
-#         instance.is_completed = validated_data.get('is_completed', instance.is_completed)
-#         instance.save()
-#         return instance
-    
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
@@ -29,3 +15,18 @@ class TodoSerializer(serializers.ModelSerializer):
         model = Todo
         # fields = ['task', 'is_completed', 'time']
         fields = '__all__'
+
+class TeacherSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Teacher
+        fields ='__all__'
+        depth = 1
+    
+    def create(self, validated_data):
+        teacher = Teacher.objects.create(name=validated_data.get('name', None))
+        students = validated_data.get('students', None)
+        if students:
+            for student in students:
+                print(student)
+        return self
+        
