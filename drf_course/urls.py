@@ -2,12 +2,16 @@ from django.contrib import admin
 from django.urls import path, include
 from api import views
 from rest_framework import urls
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import DefaultRouter, SimpleRouter
+from rest_framework.urlpatterns import format_suffix_patterns
+from django.conf import settings
+from django.conf.urls.static import static
 
-
-router = DefaultRouter()
+router = SimpleRouter()
+# router = DefaultRouter()
 router.register('t', views.TodoViewSet)
 router.register('teachers', views.TeacherViewSet)
+router.register('students', views.StudentViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -19,3 +23,6 @@ urlpatterns = [
 ]
 
 urlpatterns += router.urls
+urlpatterns += format_suffix_patterns(urlpatterns, allowed=['json', 'html'])
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

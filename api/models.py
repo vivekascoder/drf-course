@@ -8,9 +8,10 @@ class Student(models.Model):
         ('b', 'B'),
         ('c', 'C'),
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     division = models.PositiveIntegerField(default=0)
     section = models.CharField(choices=SECTION, max_length=1)
+    image = models.ImageField(upload_to="StudentImages")
 
     def my_section(self):
         return self.section

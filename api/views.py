@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from api.models import Todo
 from django.http import JsonResponse
-from api.serializers import TodoSerializer, LoginSerializer, Teacher, TeacherSerializer
+from api.serializers import TodoSerializer, LoginSerializer, Teacher, TeacherSerializer, StudentSerializer, Student
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -15,6 +15,8 @@ from rest_framework.authtoken.models import Token
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework import throttling, pagination
+from rest_framework import filters
+from rest_framework import parsers
 
 # !Create your views here.
 
@@ -29,9 +31,21 @@ class TeacherUSerThrottle(throttling.UserRateThrottle):
 class TeacherViewSet(ModelViewSet):
     queryset = Teacher.objects.all()
     serializer_class = TeacherSerializer
-    pagination_class = TeacherPagination
-    throttle_classes = [TeacherThrottle]
+    # pagination_class = TeacherPagination
+    # throttle_classes = [TeacherThrottle]
+    # filter_backends = [filters.SearchFilter]
+    # search_fields = ['^name']
     # throttle_classes = [TeacherUSerThrottle]
+    def get_queryset(self):
+        """
+        Request obj.: self.request
+        How to get that parameters of get request.        
+        1. username = self.kwargs['username']
+        2. username = self.request.query_params.get('username', None)
+        """
+        name = self.request.query_params.get('name', None)
+        return Teacher.objects.filter(name=name)
+
 
 class TodoView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TodoSerializer
@@ -78,9 +92,6 @@ class LogoutView(APIView):
         logout(request)
         return Response({'message': "You're logout"})
 
-  
-
-
 
 class TodoViewSet(ModelViewSet):
     queryset = Todo.objects.all()
@@ -89,3 +100,10 @@ class TodoViewSet(ModelViewSet):
     @action(detail=True, methods=['GET'])
     def data(self, request, **kwargs):
         return Response({'message': 'Nested Route'})
+
+
+
+class StudentViewSet(ModelViewSet):
+    serializer_class = StudentSerializer
+    queryset = Student.objects.all()
+    parser_classes = [parsers.MultiPartParser]

@@ -1,5 +1,4 @@
 from pathlib import Path
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
@@ -116,3 +115,6 @@ REST_FRAMEWORK = {
         'paid': '10/day',
     }
 }
+
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'

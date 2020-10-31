@@ -3,7 +3,10 @@ import datetime
 from api.models import Todo, Teacher, Student
 
 
-
+class StudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = '__all__'
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
